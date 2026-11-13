@@ -1,14 +1,15 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module.js';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { AppModule } from './app.module.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   const config = new DocumentBuilder()
-    .setTitle('NestJS course - PR1')
-    .setDescription('First Pull Request: setup i18n, swagger, API hello')
+    .setTitle('NestJS course - PR2')
+    .setDescription('Second pull: setup migrate database - handle logic authenticathen - register - login - logout (use redis) - Get Current User')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document)
