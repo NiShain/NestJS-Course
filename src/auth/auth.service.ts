@@ -2,7 +2,7 @@ import { ConflictException, Inject, Injectable, UnauthorizedException } from '@n
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Redis } from 'ioredis';
-import { UserService } from '../user/user.service.js';
+import { UserService } from '../module/user/user.service.js';
 import {
     DEFAULT_TOKEN_TTL_SECONDS,
     JWT_EXPIRES_IN,

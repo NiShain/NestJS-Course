@@ -7,8 +7,8 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
-import { AUTH_SCHEME_BEARER } from '../auth/constants/auth.constants.js';
-import { JwtAuthGuard } from '../auth/guards/auth.guard.js';
+import { AUTH_SCHEME_BEARER } from '../../auth/constants/auth.constants.js';
+import { JwtAuthGuard } from '../../auth/guards/auth.guard.js';
 import { UserService } from './user.service.js';
 
 
