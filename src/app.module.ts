@@ -2,16 +2,16 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
-  AcceptLanguageResolver,
-  HeaderResolver,
-  I18nModule,
-  QueryResolver
+    AcceptLanguageResolver,
+    HeaderResolver,
+    I18nModule,
+    QueryResolver
 } from 'nestjs-i18n';
 import { join } from 'node:path';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
-import { UserModule } from './user/user.module.js';
+import { UserModule } from './module/user/user.module.js';
 
 const DEFAULT_DB_PORT = 3306;
 
