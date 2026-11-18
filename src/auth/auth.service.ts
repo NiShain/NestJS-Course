@@ -82,6 +82,7 @@ export class AuthService{
             await this.redisClient.set(`blacklist:${token}`, '1', 'EX', ttl);
       }
     }
+    await this.invalidateToken(token)
     return { message: 'Logged out successfully' };
   }
 

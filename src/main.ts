@@ -23,8 +23,8 @@ async function bootstrap() {
   //setup swagger
   const config = new DocumentBuilder()
     .setTitle('NestJS course - PR2')
-    .setDescription('Second pull: setup migrate database - handle logic authenticathen - register - login - logout (use redis) - Get Current User')
-    .setVersion('1.0')
+    .setDescription('PR3: Update User - Get Profile - Follow user - Unfollow user')
+    .setVersion('1.3')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

@@ -14,15 +14,18 @@ import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/regitster.dto.js';
 import { JwtAuthGuard } from './guards/auth.guard.js';
 @ApiTags('auth')
-@Controller('/api/users')
+@Controller('/users')
 export class AuthController{
     constructor(private readonly authService: AuthService) {}
 
     @Post()
+    @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    @Header('Pragma', 'no-cache')
+    @Header('Expires', '0')
     async register(@Body() reigsterDto: RegisterDto ){
         return this.authService.register(reigsterDto.user)
     }
-
+    
     @Post('login')
     @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     @Header('Pragma', 'no-cache')

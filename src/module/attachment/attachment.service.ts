@@ -8,7 +8,7 @@ import { Attachment } from './entities/attachment.entity.js';
 @Injectable()
 export class AttachmentService{
     constructor(
-        @InjectRepository(AttachmentService)
+        @InjectRepository(Attachment)
         private readonly attachmentRepository: Repository<Attachment>,  ) {}
     
     async updateUserAvatar(

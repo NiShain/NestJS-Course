@@ -1,18 +1,17 @@
 import {
-    BadRequestException,
-    Body,
-    Controller,
-    Get,
-    Header,
-    Headers,
-    Put,
-    Req,
-    UploadedFile,
-    UseGuards,
-    UseInterceptors
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Header,
+  Put,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import * as fs from 'fs';
 import { diskStorage } from 'multer';
@@ -22,7 +21,7 @@ import { JwtAuthGuard } from '../../auth/guards/auth.guard.js';
 import { UpdateDto } from './dto/update.dto.js';
 import { UserService } from './user.service.js';
 @ApiTags('User')
-@Controller('api/user')
+@Controller('user')
 export class UserController{
     constructor(
         private readonly userService: UserService
@@ -33,6 +32,8 @@ export class UserController{
     @Header('Pragma', 'no-cache')
     @Header('Expires', '0')
     @UseGuards(JwtAuthGuard)
+    @ApiConsumes('application/json', 'multipart/form-data')
+    @ApiBody({ type: UpdateDto })
     @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -49,7 +50,7 @@ export class UserController{
       fileFilter: (req, file, cb) => {
         if (!file.mimetype.match(/\/(jpg|jpeg|png|webp)$/)) {
           return cb(
-            new BadRequestException('Chỉ chấp nhận định dạng ảnh jpg, jpeg, png, webp'),
+            new BadRequestException('Only file with .jpg, jpeg, png, webp'),
             false,
           );
         }
@@ -60,20 +61,14 @@ export class UserController{
     )
     @ApiBearerAuth()
     async updateUser(
-        @Req() req: any,
-        @Headers('authorization') authHeader: string,
-        @Body() body: any,
-        @UploadedFile() file?: Express.Multer.File,
-    ){
-        const payload: UpdateDto = body?.user ? body.user : body;
-        const token = authHeader?.split(' ')[1] || '';
-
-        return this.userService.updateUser(req.user.id, payload, token, file);
-    }
+    @Req() req: Request & { user: { id: number } },
+    @Body() updateUserDto: UpdateDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    const token = req.headers.authorization?.split(' ')[1] || '';
+    return this.userService.updateUser(req.user.id, updateUserDto, token, file);
+  }
     
-    
-
-
     @Get()
     @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     @Header('Pragma', 'no-cache')
