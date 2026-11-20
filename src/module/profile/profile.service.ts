@@ -14,7 +14,7 @@ export class ProfileService{
         @InjectRepository(User)
         private readonly userReposity: Repository<User>,
     ) {}
-    private async checkFollowing(
+    async checkFollowing(
         targetUserId: number,
         currentUserId?: number,
     ): Promise<boolean>{

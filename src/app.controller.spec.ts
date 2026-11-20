@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { I18nService } from 'nestjs-i18n';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 
@@ -8,15 +9,24 @@ describe('AppController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
-      providers: [AppService],
+      providers: [
+        AppService,
+        {
+          provide: I18nService,
+          useValue: {
+            t: vi.fn().mockReturnValue('Hello World!'),
+          },
+        },
+      ],
     }).compile();
 
     appController = app.get<AppController>(AppController);
   });
 
   describe('root', () => {
-    it('should return "Hello World!"', () => {
-      expect(appController.getHello()).toBe('Hello World!');
+    it('should return "Hello World!"', async () => {
+      const result = await appController.getHello();
+      expect(result).toBe('Hello World!');
     });
   });
 });

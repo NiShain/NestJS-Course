@@ -22,9 +22,9 @@ async function bootstrap() {
 
   //setup swagger
   const config = new DocumentBuilder()
-    .setTitle('NestJS course - PR2')
-    .setDescription('PR3: Update User - Get Profile - Follow user - Unfollow user')
-    .setVersion('1.3')
+    .setTitle('NestJS Course API')
+    .setDescription('Conduit API - PR4: CRUD Articles, Feed, Favorite/Unfavorite')
+    .setVersion('1.4')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
