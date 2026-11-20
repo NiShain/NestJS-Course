@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { Redis } from 'ioredis';
 import { UserModule } from '../module/user/user.module.js';
 import { AuthController } from './auth.controller.js';
@@ -23,6 +24,10 @@ const DEFAULT_REDIS_PORT = 6379;
         signOptions: { expiresIn: JWT_EXPIRES_IN },
       }),
     }),
+    ThrottlerModule.forRoot([{
+      ttl: 60_000,
+      limit: 5,
+    }]),
   ],
   controllers: [AuthController],
   providers: [

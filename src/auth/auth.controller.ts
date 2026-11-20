@@ -8,22 +8,29 @@ import {
     UseGuards
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Throttle, ThrottlerGuard } from '@nestjs/throttler';
 import type { Request } from 'express';
 import { AuthService } from './auth.service.js';
 import { LoginDto } from './dto/login.dto.js';
 import { RegisterDto } from './dto/regitster.dto.js';
 import { JwtAuthGuard } from './guards/auth.guard.js';
 @ApiTags('auth')
-@Controller('/api/users')
+@Controller('/users')
 export class AuthController{
     constructor(private readonly authService: AuthService) {}
 
     @Post()
+    @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    @Header('Pragma', 'no-cache')
+    @Header('Expires', '0')
+    @Throttle({ default: { limit: 5, ttl: 60_000 } })
     async register(@Body() reigsterDto: RegisterDto ){
         return this.authService.register(reigsterDto.user)
     }
-
+    
     @Post('login')
+    @UseGuards(ThrottlerGuard)
+    @Throttle({ default: { limit: 5, ttl: 60_000 } })
     @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
     @Header('Pragma', 'no-cache')
     @Header('Expires', '0')

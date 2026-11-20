@@ -1,23 +1,131 @@
 import {
-    Controller,
-    Get,
-    Header,
-    Req,
-    UseGuards
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Header,
+  Put,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors
 } from '@nestjs/common';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
+import * as fs from 'fs';
+import { diskStorage } from 'multer';
 import { AUTH_SCHEME_BEARER } from '../../auth/constants/auth.constants.js';
 import { JwtAuthGuard } from '../../auth/guards/auth.guard.js';
+import { UpdateDto } from './dto/update.dto.js';
 import { UserService } from './user.service.js';
 
+const MIME_TO_EXT: Record<string, string> = {
+  'image/jpeg': '.jpg',
+  'image/png': '.png',
+  'image/webp': '.webp',
+};
+
+const isValidImageSignature = (filePath: string, mimeType: string): boolean => {
+  const fileDescriptor = fs.openSync(filePath, 'r');
+  const header = Buffer.alloc(12);
+
+  try {
+    const bytesRead = fs.readSync(fileDescriptor, header, 0, header.length, 0);
+    if (bytesRead < header.length) {
+      return false;
+    }
+
+    const isJpeg =
+      header[0] === 0xff && header[1] === 0xd8 && header[2] === 0xff;
+    const isPng = header.subarray(0, 8).equals(
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    );
+    const isWebp =
+      header.subarray(0, 4).toString('ascii') === 'RIFF' &&
+      header.subarray(8, 12).toString('ascii') === 'WEBP';
+
+    return (
+      (mimeType === 'image/jpeg' && isJpeg) ||
+      (mimeType === 'image/png' && isPng) ||
+      (mimeType === 'image/webp' && isWebp)
+    );
+  } finally {
+    fs.closeSync(fileDescriptor);
+  }
+};
 
 @ApiTags('User')
-@Controller('api/user')
+@Controller('user')
 export class UserController{
     constructor(
         private readonly userService: UserService
     ) {}
+    
+    @Put()
+    @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    @Header('Pragma', 'no-cache')
+    @Header('Expires', '0')
+    @UseGuards(JwtAuthGuard)
+    @ApiConsumes('application/json', 'multipart/form-data')
+    @ApiBody({ type: UpdateDto })
+    @UseInterceptors(
+    FileInterceptor('image', {
+      storage: diskStorage({
+        destination: (req, file, cb) => {
+          const uploadPath = './public/uploads/avatars';
+          fs.mkdirSync(uploadPath, { recursive: true });
+          cb(null, uploadPath);
+        },
+        filename: (req, file, cb) => {
+          const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+          const extension = MIME_TO_EXT[file.mimetype];
+          if (!extension) {
+            return cb(new BadRequestException('Unsupported image type'), '');
+          }
+          cb(null, `${uniqueSuffix}${extension}`);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!MIME_TO_EXT[file.mimetype]) {
+          return cb(
+            new BadRequestException('Only file with .jpg, jpeg, png, webp'),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+      limits: { fileSize: 10 * 1024 * 1024 }, //maximum 10Mb 
+    }),
+    )
+    @ApiBearerAuth()
+    async updateUser(
+    @Req() req: Request & { user: { id: number } },
+    @Body() updateUserDto: UpdateDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    if (file && !isValidImageSignature(file.path, file.mimetype)) {
+      fs.unlinkSync(file.path);
+      throw new BadRequestException('Invalid image file signature');
+    }
+
+    const token = req.headers.authorization?.split(' ')[1] || '';
+
+    try {
+      return await this.userService.updateUser(
+        req.user.id,
+        updateUserDto,
+        token,
+        file,
+      );
+    } catch (error) {
+      if (file && fs.existsSync(file.path)) {
+        fs.unlinkSync(file.path);
+      }
+
+      throw error;
+    }
+  }
     
     @Get()
     @Header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
@@ -40,7 +148,4 @@ export class UserController{
         }   
         return this.userService.buildUserResponse(user, token);
     }
-    
-    
-
 }
