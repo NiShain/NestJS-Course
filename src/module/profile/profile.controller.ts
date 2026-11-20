@@ -1,9 +1,7 @@
 import {
   Controller,
   Delete,
-  ExecutionContext,
   Get,
-  Injectable,
   Param,
   Post,
   Req,
@@ -12,18 +10,8 @@ import {
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { JwtAuthGuard } from '../../auth/guards/auth.guard.js';
+import { OptionalJwtAuthGuard } from '../../auth/guards/optional-auth.guard.js';
 import { ProfileService } from './profile.service.js';
-
-@Injectable()
-class OptionalJwtAuthGuard extends JwtAuthGuard {
-  async canActivate(context: ExecutionContext): Promise<boolean> {
-    try {
-      return (await super.canActivate(context)) as boolean;
-    } catch {
-      return true;
-    }
-  }
-}
 
 type AuthenticatedRequest = Request & { user?: { id: number } };
 @ApiTags('Profile')

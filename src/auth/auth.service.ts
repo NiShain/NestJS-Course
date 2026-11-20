@@ -75,15 +75,8 @@ export class AuthService{
     }
 
     async logout(token: string) {
-        const decoded = this.jwtService.decode(token) as { exp?: number } | null;
-        if (decoded?.exp) {
-            const ttl = decoded.exp - Math.floor(Date.now() / 1000);
-        if (ttl > 0) {
-            await this.redisClient.set(`blacklist:${token}`, '1', 'EX', ttl);
-      }
-    }
-    await this.invalidateToken(token)
-    return { message: 'Logged out successfully' };
+        await this.invalidateToken(token)
+        return { message: 'Logged out successfully' };
   }
 
     async invalidateToken(token: string): Promise<void> {

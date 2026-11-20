@@ -62,21 +62,19 @@ export class ProfileService{
         }
 
         if (targetUser.id === currentUserId) {
-            throw new BadRequestException('Why you want to follow yourself? Lmao');
+            throw new BadRequestException('You cant follow yourself.');
         }
 
-        const alreadyFollowing = await this.checkFollowing(
-            targetUser.id,
-            currentUserId,
-        );
-
-        if (!alreadyFollowing) {
         await this.userReposity
             .createQueryBuilder()
-            .relation(User, 'followers')
-            .of(targetUser.id)
-            .add(currentUserId);
-        }
+            .insert()
+            .into('user_follows')
+            .values({
+                following_id: targetUser.id,
+                follower_id: currentUserId,
+            })
+            .orIgnore()
+            .execute();
 
         return this.buildProfileResponse(targetUser, true);
     }

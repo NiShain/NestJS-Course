@@ -1,5 +1,6 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
 
 export class UpdateDto {
   @ApiPropertyOptional({ example: 'jake@jake.jake' })
@@ -10,6 +11,10 @@ export class UpdateDto {
   @ApiPropertyOptional({ example: 'jake' })
   @IsOptional()
   @IsString()
+  @IsNotEmpty()
+  @MinLength(1)
+  @MaxLength(25)
+  @Transform(({value}) => value?.trim())
   username?: string;
 
   @ApiPropertyOptional({ example: '123456', minLength: 6 })
@@ -21,10 +26,12 @@ export class UpdateDto {
   @ApiPropertyOptional({ example: 'Backend Developer' })
   @IsOptional()
   @IsString()
+  @MaxLength(25)
   bio?: string;
 
   @ApiPropertyOptional({ example: 'https://example.com/avatar.png' })
   @IsOptional()
   @IsString()
+  @IsUrl()
   image?: string;
 }

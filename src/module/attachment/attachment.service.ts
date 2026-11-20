@@ -13,32 +13,50 @@ export class AttachmentService{
     
     async updateUserAvatar(
         file: Express.Multer.File,
-        userId: number,): Promise<Attachment>{
-            const attachableType = 'User';
-            const attachableId = String(userId);
+        userId: number,
+    ): Promise<{ attachment: Attachment; oldAttachment: Attachment | null }> {
+        const attachableType = 'User';
+        const attachableId = String(userId);
 
-            const oldAttachment = await this.attachmentRepository.findOne({
-                where: {
-                    attachable_type : attachableType,
-                    attachable_id : attachableId,
-                },
-            });
-    
-        if (oldAttachment) {
-            const oldFilePath = join(process.cwd(), oldAttachment.url);
-            if (fs.existsSync(oldFilePath)) {
-                fs.unlinkSync(oldFilePath);
-            }
-            await this.attachmentRepository.remove(oldAttachment);
-        }
-            const newAttachment = this.attachmentRepository.create({
-                url: `/public/uploads/avatars/${file.filename}`,
-                file_name: file.filename,
-                file_type: file.mimetype,
-                file_size: file.size,
+        const oldAttachment = await this.attachmentRepository.findOne({
+            where: {
                 attachable_type: attachableType,
                 attachable_id: attachableId,
-            });
-            return this.attachmentRepository.save(newAttachment);
+            },
+        });
+
+        const newAttachment = this.attachmentRepository.create({
+            url: `/public/uploads/avatars/${file.filename}`,
+            file_name: file.filename,
+            file_type: file.mimetype,
+            file_size: file.size,
+            attachable_type: attachableType,
+            attachable_id: attachableId,
+        });
+
+        const attachment = await this.attachmentRepository.save(newAttachment);
+
+        return { attachment, oldAttachment };
+    }
+
+    async removeAttachment(attachment: Attachment): Promise<void> {
+        const filePath = join(process.cwd(), attachment.url);
+
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
         }
+
+        await this.attachmentRepository.remove(attachment);
+    }
+
+    async rollbackAttachment(
+        attachment: Attachment,
+        filePath: string,
+    ): Promise<void> {
+        await this.attachmentRepository.remove(attachment);
+
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    }
 }

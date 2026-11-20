@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { Redis } from 'ioredis';
 import { UserModule } from '../module/user/user.module.js';
 import { AuthController } from './auth.controller.js';
@@ -40,10 +39,6 @@ const DEFAULT_REDIS_PORT = 6379;
           host: configService.get<string>('REDIS_HOST') || 'localhost',
           port: Number(configService.get<number>('REDIS_PORT') || DEFAULT_REDIS_PORT),
         }),
-    },
-    {
-      provide: APP_GUARD,
-      useClass: ThrottlerGuard,
     },
     AuthService, 
     JwtStrategy
