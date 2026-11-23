@@ -11,6 +11,7 @@ import { join } from 'node:path';
 import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { AuthModule } from './auth/auth.module.js';
+import { ArticleModule } from './module/article/article.module.js';
 import { ProfileModule } from './module/profile/profile.module.js';
 import { UserModule } from './module/user/user.module.js';
 
@@ -49,6 +50,7 @@ const DEFAULT_DB_PORT = 3306;
     UserModule,
     AuthModule,
     ProfileModule,
+    ArticleModule,
   ],
   controllers: [AppController],
   providers: [AppService],
