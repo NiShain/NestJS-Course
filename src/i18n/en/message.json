@@ -1,3 +1,7 @@
 {
-  "hello": "Ohello gozaimasu"
+  "hello": "Hello World!",
+  "article_not_found": "Article not found.",
+  "comment_not_found": "Comment not found.",
+  "forbidden_delete_comment": "You cannot delete another user's comment.",
+  "comment_deleted_success": "Comment deleted successfully."
 }
