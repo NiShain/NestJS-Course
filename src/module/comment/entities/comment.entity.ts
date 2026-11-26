@@ -1,44 +1,43 @@
 import {
-    Column,
-    CreateDateColumn,
-    Entity,
-    JoinColumn,
-    ManyToOne,
-    PrimaryGeneratedColumn,
-    UpdateDateColumn,
-    type Relation,
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+  type Relation,
 } from 'typeorm';
 
-import { Article } from "../../article/entities/article.entity.js";
-import { User } from "../../user/entities/user.entity.js";
-
+import { Article } from '../../article/entities/article.entity.js';
+import { User } from '../../user/entities/user.entity.js';
+import { COMMENT_BODY_MAX_LENGTH } from '../constants/comment.constants.js';
 
 @Entity('comment')
-export class Comment{
-    @PrimaryGeneratedColumn()
-    id: number;
+export class Comment {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column ( {type: 'text'})
-    body: string;
+  @Column({ type: 'varchar', length: COMMENT_BODY_MAX_LENGTH })
+  body: string;
 
-    @Column ( { name:'author_id', type: 'int' })
-    authorId: number;
+  @Column({ name: 'author_id', type: 'int' })
+  authorId: number;
 
-    @Column({ name: 'article_id', type: 'int' })
-    articleId: number;
+  @Column({ name: 'article_id', type: 'int' })
+  articleId: number;
 
-    @ManyToOne(() => Article, {onDelete: 'CASCADE'})
-    @JoinColumn({ name: 'article_id' })
-    article: Relation<Article>;
+  @ManyToOne(() => Article, { nullable: false, onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'article_id' })
+  article: Relation<Article>;
 
-    @ManyToOne(() => User,{onDelete: 'CASCADE'})
-    @JoinColumn({ name:'author_id' })
-    author: Relation<User>;
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'author_id' })
+  author: Relation<User>;
 
-    @CreateDateColumn({ name: 'created_at' })
-    createdAt: Date;
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
 
-    @UpdateDateColumn({ name: 'updated_at' })
-    updatedAt: Date;
-
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }
