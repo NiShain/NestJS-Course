@@ -5,7 +5,7 @@ import {
   AcceptLanguageResolver,
   HeaderResolver,
   I18nModule,
-  QueryResolver
+  QueryResolver,
 } from 'nestjs-i18n';
 import { join } from 'node:path';
 import { AppController } from './app.controller.js';
@@ -26,13 +26,16 @@ const DEFAULT_DB_PORT = 3306;
         path: join(import.meta.dirname, 'i18n'),
         watch: true,
       },
-    resolvers: [
+      resolvers: [
         new QueryResolver(['lang']),
         new HeaderResolver(['x-custom-lang']),
         AcceptLanguageResolver,
       ],
     }),
-    ConfigModule.forRoot( { isGlobal: true }),
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: process.env.NODE_ENV == 'test' ? '.env.test' : '.env',
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -43,9 +46,9 @@ const DEFAULT_DB_PORT = 3306;
         username: configService.get<string>('DB_USERNAME', 'root'),
         password: configService.get<string>('DB_PASSWORD', ''),
         database: configService.get<string>('DB_NAME', 'nestjs_course'),
-        entities: ['dist/**/*.entity.js'],
+        autoLoadEntities: true,
         migrations: ['dist/database/migrations/*.js'],
-        synchronize: false, 
+        synchronize: false,
       }),
     }),
     UserModule,
