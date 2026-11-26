@@ -2,6 +2,5 @@
   "hello": "Xin chào thế giới!",
   "article_not_found": "Không tìm thấy bài viết.",
   "comment_not_found": "Không tìm thấy bình luận.",
-  "forbidden_delete_comment": "Bạn không có quyền xóa bình luận của người khác.",
-  "comment_deleted_success": "Xóa bình luận thành công."
+  "forbidden_delete_comment": "Bạn không có quyền xóa bình luận của người khác."
 }
